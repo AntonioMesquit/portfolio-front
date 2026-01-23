@@ -15,9 +15,9 @@ interface NavbarMobileProps {
 export default function NavbarMobile({ isMenuOpen, toggleMenu, closeMenu }: NavbarMobileProps) {
   return (
     <>
-      <div className="md:hidden pt-4 px-4 flex justify-between items-center relative z-50 w-full overflow-x-hidden">
+      <div className="md:hidden pt-2 px-4 flex justify-between items-center relative z-50 w-full overflow-x-hidden">
         <div className="shrink-0 max-w-[60%]">
-          <Image src={logo} alt="logo" width={200} height={200} className="w-full h-auto max-w-[150px]" />
+          <Image src={logo} alt="logo" width={120} height={120} className="w-full h-auto max-w-[100px]" />
         </div>
         <MobileMenuButton isOpen={isMenuOpen} onClick={toggleMenu} />
       </div>

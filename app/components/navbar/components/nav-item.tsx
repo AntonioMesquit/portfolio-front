@@ -42,11 +42,11 @@ export default function NavItem({ item, index, isActive }: NavItemProps) {
           }
         }}
         style={{
-          padding: isActive ? "10px 16px" : "8px",
+          padding: isActive ? "6px 12px" : "5px",
         }}
       >
         <div className="flex items-center gap-2">
-          <Icon className="w-5 h-5 text-black shrink-0" strokeWidth={2} />
+          <Icon className="w-4 h-4 text-black shrink-0" strokeWidth={2} />
           <motion.div 
             className="overflow-hidden"
             initial={false}

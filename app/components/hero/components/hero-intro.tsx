@@ -66,7 +66,7 @@ export default function HeroIntro() {
           animate={{ opacity: 1 }}
           transition={{ delay: 1.1, duration: 0.5 }}
         >
-          <span className="relative z-10">aplicaçõis</span>
+          <span className="relative z-10">aplicações</span>
           <motion.svg
             className="absolute -bottom-1 left-0 w-full h-6 z-0"
             initial={{ pathLength: 0, opacity: 0 }}

@@ -16,7 +16,7 @@ export default function NavbarDesktop() {
   };
 
   return (
-    <div className="hidden md:flex items-center justify-center w-full pt-2 overflow-x-hidden">
+    <div className="hidden md:flex items-center justify-center w-full pt-2 pb-2 overflow-x-hidden">
       <div className="w-full max-w-7xl mx-auto px-4 md:px-6 lg:px-8 flex items-center justify-between">
         <Logo />
 

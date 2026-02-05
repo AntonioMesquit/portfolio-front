@@ -11,13 +11,16 @@ export default function Navbar() {
     if (isMenuOpen) {
       document.body.style.overflow = "hidden";
       document.body.style.overflowX = "hidden";
+      document.body.style.overflowY = "hidden";
     } else {
-      document.body.style.overflow = "unset";
-      document.body.style.overflowX = "unset";
+      document.body.style.overflow = "";
+      document.body.style.overflowX = "";
+      document.body.style.overflowY = "";
     }
     return () => {
-      document.body.style.overflow = "unset";
-      document.body.style.overflowX = "unset";
+      document.body.style.overflow = "";
+      document.body.style.overflowX = "";
+      document.body.style.overflowY = "";
     };
   }, [isMenuOpen]);
 

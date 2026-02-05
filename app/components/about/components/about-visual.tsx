@@ -145,8 +145,8 @@ const timelineData = timelineNodes.map((node) => {
 
 export default function AboutVisual() {
   return (
-    <div className="h-full flex flex-col">
-      <div className="flex-1 overflow-y-auto scrollbar-hide -mx-4 md:-mx-8 px-4 md:px-8">
+    <div className="w-full lg:h-full flex flex-col">
+      <div className="flex-1 lg:overflow-y-auto scrollbar-hide -mx-4 md:-mx-8 px-4 md:px-8">
         <Timeline data={timelineData} />
       </div>
       <motion.div

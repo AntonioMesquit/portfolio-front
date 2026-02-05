@@ -10,11 +10,14 @@ export default function Navbar() {
   useEffect(() => {
     if (isMenuOpen) {
       document.body.style.overflow = "hidden";
+      document.body.style.overflowX = "hidden";
     } else {
       document.body.style.overflow = "unset";
+      document.body.style.overflowX = "unset";
     }
     return () => {
       document.body.style.overflow = "unset";
+      document.body.style.overflowX = "unset";
     };
   }, [isMenuOpen]);
 

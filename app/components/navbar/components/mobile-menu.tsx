@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -12,13 +14,20 @@ interface MobileMenuProps {
 }
 
 export default function MobileMenu({ onClose }: MobileMenuProps) {
-  return (
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
+  const menuContent = (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="fixed inset-0 z-50 md:hidden flex items-center justify-center"
+      className="fixed inset-0 z-[100] md:hidden flex items-center justify-center p-4 overflow-hidden"
       style={{
         backgroundColor: "rgba(0, 0, 0, 0.4)",
       }}
@@ -34,7 +43,7 @@ export default function MobileMenu({ onClose }: MobileMenuProps) {
           stiffness: 300,
           duration: 0.5,
         }}
-        className="relative w-[90%] max-w-lg h-[85vh] rounded-3xl border-4 border-black shadow-2xl"
+        className="relative w-full max-w-lg h-[85vh] rounded-3xl border-4 border-black shadow-2xl overflow-hidden"
         onClick={(e: React.MouseEvent) => e.stopPropagation()}
         style={{
           backgroundColor: "#D3D3D3",
@@ -55,7 +64,7 @@ export default function MobileMenu({ onClose }: MobileMenuProps) {
           </div>
         </motion.div>
 
-        <div className="h-full flex flex-col p-8 pt-12 relative">
+        <div className="h-full flex flex-col p-8 pt-12 relative overflow-y-auto overflow-x-hidden">
           <motion.button
             onClick={onClose}
             className="absolute top-6 left-6 text-black hover:opacity-70 transition-opacity"
@@ -117,11 +126,11 @@ export default function MobileMenu({ onClose }: MobileMenuProps) {
             </motion.div>
           </motion.div>
 
-          <div className="flex flex-col justify-center items-center gap-8 mb-6">
+          <div className="flex flex-col justify-center items-center gap-8 mb-6 w-full">
             {navItems.map((item: NavItemType, index: number) => {
               const Icon = item.icon;
               return (
-                <Link key={item.href} href={item.href} onClick={onClose}>
+                <Link key={item.href} href={item.href} onClick={onClose} className="w-full text-center">
                   <motion.div
                     initial={{ x: -50, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
@@ -144,13 +153,13 @@ export default function MobileMenu({ onClose }: MobileMenuProps) {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.7, duration: 0.4 }}
-            className="flex flex-col gap-4 mb-6"
+            className="flex flex-col gap-4 mb-6 w-full"
           >
             <motion.a
               href="/contato"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="bg-black text-white py-4 px-8 rounded-xl font-medium text-lg hover:bg-gray-800 transition-colors text-center"
+              className="bg-black text-white py-4 px-8 rounded-xl font-medium text-lg hover:bg-gray-800 transition-colors text-center w-full"
             >
               Vamos conectar
             </motion.a>
@@ -158,7 +167,7 @@ export default function MobileMenu({ onClose }: MobileMenuProps) {
               href="/resumo"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="bg-white border-2 border-black text-black py-4 px-8 rounded-xl font-medium text-lg hover:bg-gray-200 hover:text-black transition-colors text-center"
+              className="bg-white border-2 border-black text-black py-4 px-8 rounded-xl font-medium text-lg hover:bg-gray-200 hover:text-black transition-colors text-center w-full"
             >
               Veja um resumo
             </motion.a>
@@ -195,4 +204,8 @@ export default function MobileMenu({ onClose }: MobileMenuProps) {
       </motion.div>
     </motion.div>
   );
+
+  if (!mounted) return null;
+
+  return createPortal(menuContent, document.body);
 }

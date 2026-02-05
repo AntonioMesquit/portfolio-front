@@ -25,7 +25,9 @@ export default function NavbarMobile({ isMenuOpen, toggleMenu, closeMenu }: Navb
       <div className="w-full border-t-[0.5px] border-dashed border-black/5"></div>
 
       <AnimatePresence>
-        {isMenuOpen && <MobileMenu onClose={closeMenu} />}
+        {isMenuOpen && (
+          <MobileMenu key="mobile-menu" onClose={closeMenu} />
+        )}
       </AnimatePresence>
     </>
   );

@@ -28,6 +28,14 @@ export const metadataConfig: Record<string, { title: string; description: string
     title: "Resumo",
     description: `Resumo da carreira de ${baseTitle} - Uma jornada pela minha trajetória profissional`,
   },
+  "/tonio": {
+    title: "Admin",
+    description: `Painel administrativo - ${baseTitle}`,
+  },
+  "/sobre-o-site": {
+    title: "Sobre o Site",
+    description: `Documentação e estrutura do portfólio de ${baseTitle}`,
+  },
 };
 
 export function generatePageMetadata(pathname: string): Metadata {

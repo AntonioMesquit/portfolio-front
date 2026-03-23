@@ -64,7 +64,7 @@ export default function MobileMenu({ onClose }: MobileMenuProps) {
           </div>
         </motion.div>
 
-        <div className="h-full flex flex-col p-8 pt-12 relative overflow-y-auto overflow-x-hidden">
+        <div className="h-full flex flex-col p-8 pt-12 relative overflow-y-auto overflow-x-hidden scrollbar-hide">
           <motion.button
             onClick={onClose}
             className="absolute top-6 left-6 text-black hover:opacity-70 transition-opacity"

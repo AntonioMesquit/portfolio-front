@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Geist_Mono, Poppins } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/navbar/components/navbar";
+import { Providers } from "./providers";
+import { FollowingPointerWrapper } from "./components/following-pointer-wrapper";
+import { AppLoader } from "./components/app-loader";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -37,8 +40,14 @@ export default function RootLayout({
       <body
         className={`${poppins.variable} ${geistMono.variable} antialiased overflow-x-hidden`}
       >
-        <Navbar />
-        {children}
+        <Providers>
+          <AppLoader>
+            <FollowingPointerWrapper>
+              <Navbar />
+              {children}
+            </FollowingPointerWrapper>
+          </AppLoader>
+        </Providers>
       </body>
     </html>
   );

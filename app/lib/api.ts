@@ -18,6 +18,12 @@ export interface Post {
   published_at: string | null;
   featured: boolean;
   links?: { label: string; url: string }[];
+  /**
+   * Chave de uma capa a nanquim registrada em app/components/blog/ink.
+   * Opcional e desconhecida da API: se vier vazia ou com chave nao registrada,
+   * o artigo simplesmente nao tem figura de abertura.
+   */
+  cover?: string | null;
   created_at: string;
   updated_at: string;
   categories: { id: string; name: string; slug: string }[];

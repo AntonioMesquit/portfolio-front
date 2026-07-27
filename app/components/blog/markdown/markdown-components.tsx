@@ -1,11 +1,14 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { detectLanguage } from "./detect-language";
-import { useHeadingId, getTextFromChildren } from "../table-of-contents/heading-id-context";
+import {
+  useHeadingId,
+  getTextFromChildren,
+} from "../table-of-contents/heading-id-context";
 import { slugify } from "../../../lib/slugify";
-import { PointerHighlight } from "../../ui/pointer-highlight";
 
 function useHeadingIdOrSlug(children: React.ReactNode, level: 1 | 2 | 3): string {
   const ctx = useHeadingId();
@@ -13,182 +16,218 @@ function useHeadingIdOrSlug(children: React.ReactNode, level: 1 | 2 | 3): string
   return slugify(getTextFromChildren(children)) || `heading-${level}`;
 }
 
+/*
+  Componentes NOMEADOS, não funções anônimas em propriedade de objeto.
+
+  Como arrow functions atribuídas a chaves, o ESLint não as reconhecia como
+  componentes React e acusava `rules-of-hooks` nas três — a chamada a
+  `useHeadingId` parecia um hook dentro de função comum. Nomeadas e
+  capitalizadas, a regra passa e a intenção fica explícita: são componentes.
+*/
+type HeadingProps = { children?: React.ReactNode };
+
+/* Markdown h1 sai como <h2>: o <h1> da rota é o título do artigo. */
+function MdHeading1({ children }: HeadingProps) {
+  const id = useHeadingIdOrSlug(children, 1);
+  return (
+    <h2 id={id} className="md-h2">
+      {children}
+    </h2>
+  );
+}
+
+function MdHeading2({ children }: HeadingProps) {
+  const id = useHeadingIdOrSlug(children, 2);
+  return (
+    <h2 id={id} className="md-h2">
+      {children}
+    </h2>
+  );
+}
+
+function MdHeading3({ children }: HeadingProps) {
+  const id = useHeadingIdOrSlug(children, 3);
+  return (
+    <h3 id={id} className="md-h3">
+      {children}
+    </h3>
+  );
+}
+
+/**
+ * Bloco de código.
+ *
+ * Componente separado porque precisa de estado próprio (o "copiado") — dentro
+ * do objeto de componentes ele seria uma função anônima, e hook em função
+ * anônima é exatamente o erro que os cabeçalhos acima já pagaram.
+ *
+ * A tarja só existe quando há linguagem: escrever "text" em cima de um diagrama
+ * em cerca é rótulo que não informa nada.
+ */
+function CodeBlock({ code, language }: { code: string; language: string }) {
+  const [copiado, setCopiado] = useState(false);
+
+  useEffect(() => {
+    if (!copiado) return;
+    const id = window.setTimeout(() => setCopiado(false), 2000);
+    return () => window.clearTimeout(id);
+  }, [copiado]);
+
+  return (
+    <div className="md-block">
+      <div className="md-block__bar">
+        <span>{language === "text" ? "" : language}</span>
+        <button
+          type="button"
+          className="md-block__copy"
+          onClick={() => {
+            void navigator.clipboard?.writeText(code).then(
+              () => setCopiado(true),
+              () => setCopiado(false)
+            );
+          }}
+        >
+          {copiado ? "copiado" : "copiar"}
+        </button>
+      </div>
+      <SyntaxHighlighter
+        style={oneDark as { [key: string]: React.CSSProperties }}
+        language={language}
+        PreTag="div"
+        customStyle={{
+          margin: 0,
+          padding: "1rem 1.15rem",
+          borderRadius: 0,
+          background: "transparent",
+          fontSize: "0.82rem",
+          lineHeight: 1.65,
+          overflow: "auto",
+        }}
+        codeTagProps={{ style: { fontFamily: "var(--mono)" } }}
+      >
+        {code}
+      </SyntaxHighlighter>
+    </div>
+  );
+}
+
 export function createMarkdownComponents() {
   return {
-    h1: ({ children }: { children?: React.ReactNode }) => {
-      const id = useHeadingIdOrSlug(children, 1);
-      return (
-        <h1 id={id} className="mt-12 mb-5 text-3xl md:text-4xl font-bold text-neutral-900 dark:text-white first:mt-0 scroll-mt-24 pb-2 border-b border-neutral-200 dark:border-neutral-700">
-          {children}
-        </h1>
-      );
-    },
-    h2: ({ children }: { children?: React.ReactNode }) => {
-      const id = useHeadingIdOrSlug(children, 2);
-      return (
-        <h2 id={id} className="mt-10 mb-4 text-2xl md:text-3xl font-bold text-neutral-900 dark:text-white scroll-mt-24">
-          {children}
-        </h2>
-      );
-    },
-    h3: ({ children }: { children?: React.ReactNode }) => {
-      const id = useHeadingIdOrSlug(children, 3);
-      return (
-        <h3 id={id} className="mt-8 mb-3 text-xl font-bold text-neutral-900 dark:text-white scroll-mt-24">
-          {children}
-        </h3>
-      );
-    },
+    h1: MdHeading1,
+    h2: MdHeading2,
+    h3: MdHeading3,
     p: ({ children }: { children?: React.ReactNode }) => (
-      <p className="mb-5 text-neutral-700 dark:text-neutral-300 leading-[1.75]">{children}</p>
+      <p className="md-p">{children}</p>
     ),
     blockquote: ({ children }: { children?: React.ReactNode }) => (
-      <blockquote className="my-6 pl-5 pr-5 py-4 rounded-xl border-l-4 border-amber-400 dark:border-amber-600 bg-amber-50/80 dark:bg-amber-950/30 text-neutral-800 dark:text-neutral-200 not-italic">
-        {children}
-      </blockquote>
+      <blockquote className="md-quote">{children}</blockquote>
     ),
-    pre: ({ children }: { children?: React.ReactNode }) => {
-      const child = Array.isArray(children) ? children[0] : children;
-      const props = typeof child === "object" && child !== null && "props" in child ? (child as { props?: Record<string, unknown> }).props : undefined;
-      const isCodeBlock = props && "data-code-block" in props;
-      const isHighlighter =
-        !isCodeBlock &&
-        typeof child === "object" &&
-        child !== null &&
-        "type" in child &&
-        (child as { type?: unknown }).type === SyntaxHighlighter;
-      if (isCodeBlock || isHighlighter)
-        return (
-          <div className="my-6 overflow-hidden rounded-lg bg-[#1e1e1e]">
-            {children}
-          </div>
-        );
-      return <pre className="my-6 overflow-x-auto scrollbar-hide rounded-lg bg-[#1e1e1e] px-5 py-4 text-sm leading-relaxed">{children}</pre>;
-    },
+
+    /*
+      `pre` transparente, de propósito.
+
+      Antes este componente tentava detectar se o filho era o bloco de código
+      customizado, por `"data-code-block" in props` e por comparação de
+      `child.type === SyntaxHighlighter`. As duas checagens eram SEMPRE falsas:
+      o atributo fica no <div> que `code` RETORNA, não nas props do filho, e o
+      tipo do filho é a função `code`, nunca o highlighter. O resultado era um
+      <pre> extra com fundo e padding duplicados em volta de todo bloco.
+    */
+    pre: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
+
+    /*
+      BUG CORRIGIDO: `inline` não existe mais.
+
+      react-markdown 9 parou de passar props sintéticas para os componentes, e
+      a versão instalada é a 10.1. `inline` chegava sempre `undefined`, então
+      TODO código em crase simples caía no caminho de bloco — inclusive dentro
+      de títulos e parágrafos, o que produzia um bloco de código completo, com
+      barra de título e bolinhas, dentro de um <h3>. Acontecia no artigo em
+      destaque do próprio site.
+
+      A detecção correta: bloco é o que tem `language-*` no className (crase
+      tripla com linguagem) ou o que contém quebra de linha.
+    */
     code: ({
       className,
       children,
-      inline,
       ...props
-    }: React.HTMLAttributes<HTMLElement> & { inline?: boolean }) => {
-      if (inline) {
+    }: React.HTMLAttributes<HTMLElement>) => {
+      const raw = String(children ?? "");
+      const match = /language-(\w+)/.exec(className || "");
+      const isBlock = Boolean(match) || raw.includes("\n");
+
+      if (!isBlock) {
         return (
-          <code
-            className="rounded bg-neutral-800 px-1.5 py-0.5 font-mono text-sm text-neutral-200"
-            {...props}
-          >
+          <code className="md-code" {...props}>
             {children}
           </code>
         );
       }
-      const match = /language-(\w+)/.exec(className || "");
-      let language = match ? match[1] : "text";
-      if (language === "text" || language === "plaintext") {
-        language = detectLanguage(String(children));
-      }
-      return (
-        <div data-code-block className="scrollbar-hide">
-          <div className="flex items-center justify-between border-b border-neutral-700/50 bg-[#252526] px-4 py-2">
-            <span className="font-mono text-xs capitalize text-neutral-400">{language}</span>
-            <div className="flex gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
-              <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
-              <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
-            </div>
-          </div>
-          <SyntaxHighlighter
-            style={oneDark as { [key: string]: React.CSSProperties }}
-            language={language} 
-            PreTag="div"
-            customStyle={{
-              margin: 0,
-              padding: "1rem 1.25rem",
-              borderRadius: 0,
-              fontSize: "0.875rem",
-              lineHeight: 1.6,
-              overflow: "auto",
-              boxShadow: "none",
-            }}
-            codeTagProps={{ style: { fontFamily: "ui-monospace, monospace" } }}
-          >
-            {String(children).replace(/\n$/, "")}
-          </SyntaxHighlighter>
-        </div>
-      );
+
+      const language = match ? match[1] : detectLanguage(raw);
+
+      return <CodeBlock code={raw.replace(/\n$/, "")} language={language} />;
     },
+
     ul: ({ children }: { children?: React.ReactNode }) => (
-      <ul className="my-5 list-disc space-y-2.5 pl-6 text-neutral-700 dark:text-neutral-300 [&>li]:leading-relaxed marker:text-amber-500 dark:marker:text-amber-400">
-        {children}
-      </ul>
+      <ul className="md-ul">{children}</ul>
     ),
     ol: ({ children }: { children?: React.ReactNode }) => (
-      <ol className="my-5 space-y-2.5 pl-6 list-decimal text-neutral-700 dark:text-neutral-300 [&>li]:leading-relaxed marker:font-semibold marker:text-amber-600 dark:marker:text-amber-400">
-        {children}
-      </ol>
+      <ol className="md-ol">{children}</ol>
     ),
-    li: ({ children }: { children?: React.ReactNode }) => (
-      <li className="pl-1">{children}</li>
-    ),
-    a: ({ href, children }: { href?: string; children?: React.ReactNode }) => (
-      <a
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="font-medium text-amber-700 dark:text-amber-400 underline decoration-amber-300 dark:decoration-amber-600 hover:decoration-amber-600 dark:hover:decoration-amber-400 underline-offset-2 transition-colors"
-      >
-        {children}
-      </a>
-    ),
-    strong: ({ children }: { children?: React.ReactNode }) => (
-      <PointerHighlight
-        rectangleClassName="rounded-sm bg-amber-100 dark:bg-amber-900/30 border-amber-300 dark:border-amber-700"
-        pointerClassName="text-amber-600 dark:text-amber-400 h-3 w-3"
-        containerClassName="inline-block mx-1"
-      >
-        <strong className="relative z-10 font-bold text-neutral-900 dark:text-neutral-100">
+    li: ({ children }: { children?: React.ReactNode }) => <li>{children}</li>,
+
+    a: ({ href, children }: { href?: string; children?: React.ReactNode }) => {
+      // Âncora interna do próprio artigo não abre em aba nova.
+      const external = Boolean(href && !href.startsWith("#"));
+      return (
+        <a
+          href={href}
+          className="ed-link"
+          {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+        >
           {children}
-        </strong>
-      </PointerHighlight>
+        </a>
+      );
+    },
+
+    /*
+      `strong` volta a ser `strong`.
+
+      Antes era embrulhado em <PointerHighlight>, que renderiza um <div> — ou
+      seja, um bloco dentro de um <p>, marcação inválida — e desenhava um
+      retângulo amarelo animado atrás de cada negrito. Num sistema de tinta
+      chapada, negrito é peso de tinta.
+    */
+    strong: ({ children }: { children?: React.ReactNode }) => (
+      <strong className="md-strong">{children}</strong>
     ),
-    hr: () => <hr className="my-10 border-neutral-200 dark:border-neutral-700" />,
+
+    hr: () => <hr className="md-hr" />,
+
     table: ({ children }: { children?: React.ReactNode }) => (
-      <div className="my-6 overflow-x-auto scrollbar-hide rounded-xl border border-neutral-200 dark:border-neutral-700">
-        <table className="w-full min-w-[400px] text-sm">{children}</table>
+      <div className="md-table-wrap">
+        <table className="md-table">{children}</table>
       </div>
     ),
-    thead: ({ children }: { children?: React.ReactNode }) => (
-      <thead className="bg-neutral-50 dark:bg-neutral-900/50 border-b border-neutral-200 dark:border-neutral-700">
-        {children}
-      </thead>
-    ),
-    tbody: ({ children }: { children?: React.ReactNode }) => (
-      <tbody className="divide-y divide-neutral-200 dark:divide-neutral-700">{children}</tbody>
-    ),
-    tr: ({ children }: { children?: React.ReactNode }) => (
-      <tr className="hover:bg-neutral-50/50 dark:hover:bg-neutral-900/30 transition-colors">
-        {children}
-      </tr>
-    ),
-    th: ({ children }: { children?: React.ReactNode }) => (
-      <th className="px-4 py-3 text-left font-semibold text-neutral-900 dark:text-white">
-        {children}
-      </th>
-    ),
-    td: ({ children }: { children?: React.ReactNode }) => (
-      <td className="px-4 py-3 text-neutral-700 dark:text-neutral-300">
-        {children}
-      </td>
-    ),
+    thead: ({ children }: { children?: React.ReactNode }) => <thead>{children}</thead>,
+    tbody: ({ children }: { children?: React.ReactNode }) => <tbody>{children}</tbody>,
+    tr: ({ children }: { children?: React.ReactNode }) => <tr>{children}</tr>,
+    th: ({ children }: { children?: React.ReactNode }) => <th>{children}</th>,
+    td: ({ children }: { children?: React.ReactNode }) => <td>{children}</td>,
+
     img: (props: React.ImgHTMLAttributes<HTMLImageElement>) => {
       const src = typeof props.src === "string" ? props.src : undefined;
       if (!src) return null;
       return (
-        <span className="my-6 block">
+        <span className="md-figure">
+          {/* eslint-disable-next-line @next/next/no-img-element -- host arbitrário vindo do markdown; next/image exigiria allowlist */}
           <img
-            {...props}
             src={src}
             alt={props.alt || ""}
-            className="max-w-full rounded-xl border border-neutral-200 dark:border-neutral-700 shadow-lg"
+            loading="lazy"
+            referrerPolicy="no-referrer"
           />
         </span>
       );

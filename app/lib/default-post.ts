@@ -74,30 +74,25 @@ A página **Sobre** conta a história em uma **timeline vertical interativa**.
 
 ---
 
-## Projetos: galeria com arquitetura visual
+## Projetos: uma prancha técnica que se remonta
 
-A seção de projetos é uma das mais ricas: cada projeto mostra **descrição**, **preview visual** e um **diagrama de arquitetura** interativo.
+A página de projetos é desenhada como uma **prancha de desenho técnico**: papel milimetrado, traço fino, rótulos em monoespaçada e um cartucho de identificação no rodapé da folha.
 
 ### Fluxo de uso
 
-1. **Seleção de projeto** — use as setas ou os indicadores coloridos para trocar entre Piesse, Frevo, Egle e 1001Tem
-2. **Informações à esquerda** — nome, descrição curta, descrição longa e tecnologias em tags
-3. **Preview da aplicação** — imagem representativa com hover e botão "Ver mais"
-4. **Diagrama de arquitetura** — componentes (Frontend, API, DB, etc.) conectados em um grafo visual
+1. **Seleção de projeto** — setas, abas numeradas ou as teclas de direção trocam entre Piesse, Frevo, Egle e 1001Tem
+2. **Coluna de texto** — índice, nome, uma linha de posicionamento, um parágrafo e a especificação da stack em lista numerada
+3. **Área de desenho** — o diagrama de arquitetura do projeto, com marcas de registro nos cantos
 
-### Diagrama (React Flow)
+### A arquitetura viva
 
-Cada projeto tem um **workflow** mostrando:
+O diagrama não é um slideshow. Cada nó carrega um **papel estável** — cliente, API, banco, pagamento, IA — e três desses papéis existem nos quatro projetos.
 
-- **Nós** com ícones (Globe, Server, Database, Cloud, etc.)
-- **Conexões** entre frontend, backend, banco, serviços externos
-- **Cores** diferentes por projeto (indigo, rosa, verde, âmbar)
-- **Zoom e pan** para explorar o diagrama
-- **Fit view** automático ao trocar de projeto
+Ao trocar de projeto, esses três **não somem e reaparecem**: eles se movem fisicamente pela tela até a nova posição, trocando de rótulo no caminho (NestJS vira Express, vira FastAPI, vira Apollo). Os serviços exclusivos de cada projeto nascem a partir do nó da API e colapsam de volta nele.
 
-### Tecnologias
+As conexões são redesenhadas a cada quadro, acompanhando os nós durante o voo. A leitura que fica é a intenção da página: **o mesmo problema, resolvido com stacks diferentes**.
 
-As tags de tecnologias usam a cor do projeto, com bordas e efeito de hover suave.
+Quem prefere menos movimento tem a animação substituída por um corte simples, respeitando a preferência do sistema.
 
 ---
 
@@ -176,7 +171,7 @@ O painel **\`/tonio\`** permite gerenciar o blog sem mexer no código.
 | **Framer Motion** | Animações e transições |
 | **React Query** | Cache e fetching de dados |
 | **Lucide React** | Ícones |
-| **@xyflow/react** | Diagramas de arquitetura |
+| **GSAP (Flip)** | Diagramas de arquitetura animados |
 | **react-markdown** | Renderização de artigos |
 | **BlockNote** | Editor Markdown no admin |
 

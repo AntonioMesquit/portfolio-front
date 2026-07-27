@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Script Node de build (CJS), roda fora do bundle: as regras de TS/React
+    // do preset de app não se aplicam a ele.
+    "scripts/**",
   ]),
 ]);
 

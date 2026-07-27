@@ -1,5 +1,4 @@
 export { default as ProjectsSection } from "./projects-section";
-export { default as ProjectCard } from "./project-card";
-export { default as ProjectFlow } from "./project-flow";
+export { BlueprintDiagram } from "./blueprint/blueprint-diagram";
 export { projectsData } from "./projects-data";
-export type { Project } from "./project-card";
+export type { Project, BlueprintNode, BlueprintEdge, NodeRole } from "./types";

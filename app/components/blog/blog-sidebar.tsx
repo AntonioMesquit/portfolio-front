@@ -1,6 +1,5 @@
 "use client";
 
-import { FolderOpen } from "lucide-react";
 import type { Category } from "../../lib/api";
 
 interface BlogSidebarProps {
@@ -10,6 +9,17 @@ interface BlogSidebarProps {
   totalPostsCount: number;
 }
 
+/**
+ * Filtros em linha, não uma barra lateral.
+ *
+ * A lateral custava uma coluna inteira do layout para quatro botões, e os
+ * botões eram pílulas âmbar com canto arredondado. Aqui os assuntos ficam numa
+ * tira horizontal em monoespaçada, e o ativo é sublinhado por um fio pesado —
+ * a mesma marcação da aba ativa no header.
+ *
+ * `aria-pressed` e não `aria-current`: são filtros que ligam e desligam, não
+ * navegação.
+ */
 export function BlogSidebar({
   categories,
   selectedCategory,
@@ -17,39 +27,29 @@ export function BlogSidebar({
   totalPostsCount,
 }: BlogSidebarProps) {
   return (
-    <aside className="lg:w-56 shrink-0">
-      <h2 className="text-xs font-bold text-neutral-600 dark:text-neutral-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-        <FolderOpen className="w-4 h-4 text-amber-500 dark:text-amber-400" />
-        Categorias
-      </h2>
-      <nav className="space-y-1">
+    <div className="cd-filters" role="group" aria-label="Filtrar por assunto">
+      <button
+        type="button"
+        className="cd-filter"
+        aria-pressed={selectedCategory === null}
+        onClick={() => onSelectCategory(null)}
+      >
+        Todos <span className="cd-filter__n">{totalPostsCount}</span>
+      </button>
+
+      {categories.map((category) => (
         <button
-          onClick={() => onSelectCategory(null)}
-          className={`w-full text-left py-2.5 px-3.5 rounded-xl text-sm font-medium transition-colors ${
-            selectedCategory === null
-              ? "bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-700/50 text-amber-900 dark:text-amber-200"
-              : "text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-900/50 hover:text-neutral-900 dark:hover:text-white"
-          }`}
+          key={category.id}
+          type="button"
+          className="cd-filter"
+          aria-pressed={selectedCategory === category.slug}
+          onClick={() =>
+            onSelectCategory(selectedCategory === category.slug ? null : category.slug)
+          }
         >
-          Todos os artigos [<span className="tabular-nums font-semibold">{totalPostsCount}</span>]
+          {category.name} <span className="cd-filter__n">{category.post_count}</span>
         </button>
-        {categories.map((c) => (
-          <button
-            key={c.id}
-            onClick={() => onSelectCategory(selectedCategory === c.slug ? null : c.slug)}
-            className={`w-full text-left py-2.5 px-3.5 rounded-xl text-sm font-medium transition-colors ${
-              selectedCategory === c.slug
-                ? "bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-700/50 text-amber-900 dark:text-amber-200"
-                : "text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-900/50 hover:text-neutral-900 dark:hover:text-white"
-            }`}
-          >
-            {c.name} [<span className="tabular-nums font-semibold">{c.post_count}</span>]
-          </button>
-        ))}
-        {categories.length === 0 && (
-          <p className="text-neutral-500 text-sm py-2">Nenhuma categoria ainda</p>
-        )}
-      </nav>
-    </aside>
+      ))}
+    </div>
   );
 }

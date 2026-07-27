@@ -13,11 +13,7 @@ import {
   type Post,
 } from "../lib/api";
 import { queryKeys } from "../lib/query-keys";
-import {
-  defaultPost,
-  isDefaultPostSlug,
-  mergeWithDefaultPost,
-} from "../lib/default-post";
+import { findLocalPost, mergeWithLocalPosts } from "../lib/posts";
 
 export type PostsParams = {
   category?: string;
@@ -27,25 +23,51 @@ export type PostsParams = {
   featured?: boolean;
 };
 
+/**
+ * Fonte única das opções desta query.
+ *
+ * Existe para que o prefetch e o hook usem exatamente a mesma `queryFn`. Semear
+ * a chave por fora, com dados que não passaram pelo `mergeWithLocalPosts`,
+ * produz um cache fresco e errado: a `queryFn` nunca roda e os artigos locais
+ * somem.
+ */
+export function postsQueryOptions(params?: PostsParams) {
+  return {
+    queryKey: queryKeys.posts(params),
+    queryFn: async () => {
+      try {
+        const posts = await getPosts(params);
+        return mergeWithLocalPosts(posts, params);
+      } catch (err) {
+        // Os artigos locais aparecem mesmo com a API fora do ar.
+        if (process.env.NODE_ENV !== "production") {
+          console.warn("[usePosts] falha ao carregar posts da API:", err);
+        }
+        return mergeWithLocalPosts([], params);
+      }
+    },
+    /*
+      Resultado local IMEDIATO enquanto a rede não responde.
+
+      Cada termo digitado é uma queryKey nova, e o sumário esperava o fetch
+      terminar para mostrar qualquer coisa — com a API fora do ar isso é o
+      timeout de conexão inteiro, medido em ~4s por tecla. `keepPreviousData`
+      resolvia o piscar mostrando a lista ERRADA nesse intervalo.
+      Os artigos que moram no repositório não dependem de rede: filtrá-los é
+      síncrono. Então o estado inicial de toda busca já é a resposta certa para
+      a parte local, e a rede só acrescenta.
+    */
+    placeholderData: () => mergeWithLocalPosts([], params),
+    staleTime: 1000 * 60 * 5, // 5 minutos
+  };
+}
+
 export function usePosts(
   params?: PostsParams,
   options?: Omit<UseQueryOptions<Post[]>, "queryKey" | "queryFn">
 ) {
   return useQuery({
-    queryKey: queryKeys.posts(params),
-    queryFn: async () => {
-      try {
-        const posts = await getPosts(params);
-        return mergeWithDefaultPost(posts, params);
-      } catch (err) {
-        // Garante que o post padrão sempre apareça mesmo se a API falhar
-        if (process.env.NODE_ENV !== "production") {
-          console.warn("[usePosts] falha ao carregar posts da API:", err);
-        }
-        return mergeWithDefaultPost([], params);
-      }
-    },
-    staleTime: 1000 * 60 * 5, // 5 minutos
+    ...postsQueryOptions(params),
     ...options,
   });
 }
@@ -57,7 +79,8 @@ export function usePost(
   return useQuery({
     queryKey: queryKeys.post(slug),
     queryFn: async () => {
-      if (isDefaultPostSlug(slug)) return defaultPost;
+      const local = findLocalPost(slug);
+      if (local) return local;
       try {
         const post = await getPost(slug);
         return post;

@@ -43,7 +43,10 @@ export function HeadingIdProvider({
   }, [headings]);
 
   const registerHeading = useCallback(
-    (children: React.ReactNode, level: 1 | 2 | 3): string => {
+    // `level` faz parte do contrato do contexto (o consumidor sempre informa),
+    // mas o casamento aqui é POSICIONAL: o n-ésimo título renderizado recebe o
+    // n-ésimo id extraído. O nível não entra na conta.
+    (children: React.ReactNode, _level: 1 | 2 | 3): string => {
       const item = headings[indexRef.current];
       indexRef.current += 1;
       if (item) return item.id;

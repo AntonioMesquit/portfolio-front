@@ -1,6 +1,6 @@
 "use client";
 
-import { Search } from "lucide-react";
+import { useId } from "react";
 
 interface BlogSearchProps {
   value: string;
@@ -8,20 +8,30 @@ interface BlogSearchProps {
   placeholder?: string;
 }
 
+/**
+ * Busca como linha de formulário impresso: rótulo em monoespaçada, campo sem
+ * caixa, um fio embaixo que escurece no foco. Sem ícone de lupa, sem pílula.
+ */
 export function BlogSearch({
   value,
   onChange,
-  placeholder = "Buscar artigos...",
+  placeholder = "título, assunto, trecho…",
 }: BlogSearchProps) {
+  const id = useId();
+
   return (
-    <div className="relative">
-      <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400 dark:text-neutral-500" />
+    <div className="cd-search">
+      <label className="cd-search__label" htmlFor={id}>
+        Buscar
+      </label>
       <input
-        type="text"
+        id={id}
+        className="cd-search__input"
+        type="search"
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className="w-full pl-12 pr-4 py-3.5 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 focus:ring-2 focus:ring-amber-500/50 focus:border-amber-400 dark:focus:border-amber-600 outline-none text-neutral-900 dark:text-white placeholder:text-neutral-400 dark:placeholder:text-neutral-500 transition-colors"
+        autoComplete="off"
       />
     </div>
   );

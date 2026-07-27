@@ -47,7 +47,7 @@ const pages = [
 
 export default function SobreOSitePage() {
   return (
-    <div className="min-h-screen w-full pt-24 pb-20 bg-white">
+    <div className="min-h-screen w-full pt-24 pb-20 bg-[var(--paper)]">
       <div className="w-full max-w-4xl mx-auto px-4 md:px-6">
         {/* Hero */}
         <motion.header
@@ -64,7 +64,7 @@ export default function SobreOSitePage() {
               <p className="text-sm font-medium text-neutral-500 uppercase tracking-wider">
                 Documentação
               </p>
-              <h1 className="text-2xl md:text-3xl font-bold text-neutral-900 cherry-bomb-one-regular">
+              <h1 className="text-2xl md:text-3xl font-bold text-neutral-900">
                 Sobre o Site
               </h1>
             </div>
@@ -136,10 +136,12 @@ export default function SobreOSitePage() {
               <div className="p-6 rounded-2xl bg-neutral-50 border border-neutral-100">
                 <h3 className="font-semibold text-neutral-900 mb-2">Projetos</h3>
                 <p className="text-neutral-600 text-sm leading-relaxed mb-4">
-                  Galeria interativa com preview, diagrama de arquitetura e tecnologias de cada projeto.
+                  Prancha de desenho técnico animada: o diagrama de arquitetura se
+                  remonta ao trocar de projeto, com os nós compartilhados viajando
+                  pela tela em vez de sumir e reaparecer.
                 </p>
                 <div className="grid sm:grid-cols-2 gap-3">
-                  {projects.map((proj, i) => (
+                  {projects.map((proj) => (
                     <div
                       key={proj.name}
                       className="p-3 rounded-lg bg-white border border-neutral-200"
@@ -169,7 +171,7 @@ export default function SobreOSitePage() {
               Tecnologias
             </h2>
             <div className="flex flex-wrap gap-2">
-              {["Next.js 16", "React 19", "TypeScript", "Tailwind CSS 4", "Framer Motion", "React Flow", "Lucide Icons", "Poppins"].map((tech) => (
+              {["Next.js 16", "React 19", "TypeScript", "Tailwind CSS 4", "Framer Motion", "GSAP Flip", "Lucide Icons", "Poppins"].map((tech) => (
                 <span
                   key={tech}
                   className="px-3 py-1.5 rounded-lg bg-neutral-100 text-neutral-700 text-sm font-medium"

@@ -1,117 +1,143 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Code2, ChevronLeft, ChevronRight, Layers } from "lucide-react";
+import {
+  useCallback,
+  useRef,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent,
+} from "react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { projectsData } from "./projects-data";
-import ProjectInfo from "./project-info";
-import ProjectDetail from "./project-detail";
+import { ProjectMeta } from "./project-meta";
+import { TitleBlock } from "./title-block";
+import { BlueprintDiagram } from "./blueprint/blueprint-diagram";
+import { useFlipTransition } from "./blueprint/use-flip-transition";
 
 export default function ProjectsSection() {
-  const [currentProjectIndex, setCurrentProjectIndex] = useState(0);
-  const currentProject = projectsData[currentProjectIndex];
+  const [index, setIndex] = useState(0);
+  const { containerRef, capture } = useFlipTransition(index);
+  const navRef = useRef<HTMLDivElement>(null);
 
-  const nextProject = () => {
-    setCurrentProjectIndex((prev) => (prev + 1) % projectsData.length);
-  };
+  const total = projectsData.length;
+  const project = projectsData[index];
 
-  const prevProject = () => {
-    setCurrentProjectIndex(
-      (prev) => (prev - 1 + projectsData.length) % projectsData.length
-    );
-  };
+  /**
+   * Capturar ANTES de mudar o índice é o contrato do Flip: ele precisa ler o DOM
+   * no estado antigo para calcular o delta de cada nó.
+   */
+  const goTo = useCallback(
+    (next: number) => {
+      const target = ((next % total) + total) % total;
+      if (target === index) return;
+      capture();
+      setIndex(target);
+    },
+    [capture, index, total]
+  );
+
+  /**
+   * Só `←`/`→`: a faixa é horizontal, e capturar `↑`/`↓` com preventDefault
+   * roubaria a rolagem por teclado da página.
+   */
+  const onNavKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      let target: number | null = null;
+      if (event.key === "ArrowRight") target = index + 1;
+      else if (event.key === "ArrowLeft") target = index - 1;
+      else if (event.key === "Home") target = 0;
+      else if (event.key === "End") target = total - 1;
+      if (target === null) return;
+
+      event.preventDefault();
+      const resolved = ((target % total) + total) % total;
+      goTo(resolved);
+      navRef.current?.querySelectorAll<HTMLButtonElement>("button")[resolved]?.focus();
+    },
+    [goTo, index, total]
+  );
 
   return (
-    <section className="relative w-full overflow-x-hidden">
-      <div className="relative z-10 w-full max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-5 gap-8 md:gap-12 lg:gap-16 xl:gap-20 items-start px-4 sm:px-6 md:px-8 pt-20 md:pt-28 pb-12 md:pb-20">
-        {/* Header badge - visible on mobile */}
-        <div className="lg:hidden mb-4">
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xl border border-neutral-200/80 dark:border-neutral-700/80 shadow-lg shadow-black/5"
-          >
-            <Layers className="w-4 h-4 text-neutral-600 dark:text-neutral-400" />
-            <span className="text-xs font-semibold text-neutral-700 dark:text-neutral-300 uppercase tracking-widest">
-              Projetos em destaque
-            </span>
-          </motion.div>
+    <section className="bp-page" aria-label="Projetos">
+      <div className="bp-page__inner">
+        <div data-tx>
+          <ProjectMeta project={project} index={index} total={total} />
         </div>
 
-        {/* Left column - Project info */}
-        <div className="space-y-6 md:space-y-8 lg:col-span-2 lg:sticky lg:top-28 self-start">
-          <ProjectInfo project={currentProject} />
+        {/*
+          O acento vive na stage, não na folha: as setas são irmãs das abas e
+          ficavam fora do escopo da variável, herdando o índigo da página mesmo
+          com um projeto rosa ativo.
+        */}
+        <div
+          data-tx
+          className="bp-stage"
+          style={
+            {
+              "--bp-accent": project.color,
+              "--bp-accent-text": project.colorText,
+            } as CSSProperties
+          }
+        >
+          <div className="bp-sheet">
+            <BlueprintDiagram ref={containerRef} projects={projectsData} index={index} />
+            <TitleBlock project={project} index={index} total={total} />
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.5 }}
-            className="flex items-center gap-3 sm:gap-4 pt-2"
-          >
-            <motion.button
-              onClick={prevProject}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl bg-white/90 dark:bg-neutral-900/90 backdrop-blur-xl border border-neutral-200/80 dark:border-neutral-700/80 shadow-lg shadow-black/5 hover:shadow-xl hover:border-neutral-300/80 dark:hover:border-neutral-600/80 transition-all duration-300 flex-shrink-0"
+          {/*
+            Grupo de botões com aria-current, e não tablist/tabpanel: o conteúdo
+            que a navegação troca (nome, tagline, especificação) vive em
+            ProjectMeta, fora de qualquer painel — declarar `tabpanel` na folha
+            anunciaria uma relação que não existe. O anúncio da troca vem da
+            região aria-live dentro do diagrama.
+          */}
+          <div className="bp-nav" /* wrapper visual: setas + faixa de abas */>
+            <button
+              type="button"
+              className="bp-nav__arrow"
+              onClick={() => goTo(index - 1)}
               aria-label="Projeto anterior"
             >
-              <ChevronLeft className="w-5 h-5 text-neutral-600 dark:text-neutral-400" />
-            </motion.button>
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            </button>
 
-            <div className="flex-1 flex items-center justify-center gap-2.5">
-              {projectsData.map((project, index) => (
-                <motion.button
-                  key={project.id}
-                  onClick={() => setCurrentProjectIndex(index)}
-                  whileHover={{ scale: 1.3 }}
-                  whileTap={{ scale: 0.9 }}
-                  className={`h-2.5 rounded-full transition-all duration-300 ${
-                    index === currentProjectIndex
-                      ? "shadow-lg"
-                      : "w-2.5 bg-neutral-300/80 dark:bg-neutral-600/80 hover:bg-neutral-400/80 dark:hover:bg-neutral-500/80"
-                  }`}
-                  style={
-                    index === currentProjectIndex
-                      ? {
-                          width: "2rem",
-                          backgroundColor: project.color,
-                          boxShadow: `0 0 20px ${project.color}50`,
-                        }
-                      : {}
-                  }
-                  aria-label={`Ir para projeto ${index + 1}`}
-                />
+            {/*
+              O ref e o keydown ficam AQUI, não no .bp-nav: a busca por `button`
+              no container externo pegaria as duas setas e deslocaria o índice de
+              foco em um.
+            */}
+            <div
+              ref={navRef}
+              className="bp-nav__tabs"
+              role="group"
+              aria-label="Selecionar projeto"
+              onKeyDown={onNavKeyDown}
+            >
+              {projectsData.map((candidate, position) => (
+                <button
+                  key={candidate.id}
+                  type="button"
+                  aria-current={position === index ? "true" : undefined}
+                  className="bp-nav__tab"
+                  onClick={() => goTo(position)}
+                >
+                  <span className="bp-nav__tab-number">
+                    {String(position + 1).padStart(2, "0")}
+                  </span>
+                  <span className="bp-nav__tab-name">{candidate.name}</span>
+                </button>
               ))}
             </div>
 
-            <motion.button
-              onClick={nextProject}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl bg-white/90 dark:bg-neutral-900/90 backdrop-blur-xl border border-neutral-200/80 dark:border-neutral-700/80 shadow-lg shadow-black/5 hover:shadow-xl hover:border-neutral-300/80 dark:hover:border-neutral-600/80 transition-all duration-300 flex-shrink-0"
+            <button
+              type="button"
+              className="bp-nav__arrow"
+              onClick={() => goTo(index + 1)}
               aria-label="Próximo projeto"
             >
-              <ChevronRight className="w-5 h-5 text-neutral-600 dark:text-neutral-400" />
-            </motion.button>
-          </motion.div>
-        </div>
-
-        {/* Right column - Project detail */}
-        <div className="w-full lg:col-span-3 min-w-0">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentProject.id}
-              initial={{ opacity: 0, x: 40, scale: 0.98 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: -40, scale: 0.98 }}
-              transition={{
-                duration: 0.5,
-                ease: [0.25, 0.1, 0.25, 1],
-              }}
-            >
-              <ProjectDetail project={currentProject} />
-            </motion.div>
-          </AnimatePresence>
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </button>
+          </div>
         </div>
       </div>
     </section>

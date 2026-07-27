@@ -133,7 +133,7 @@ export default function AdminTonioPage() {
   };
 
   return (
-    <div className="min-h-screen w-full pt-24 pb-16 bg-white">
+    <div className="min-h-screen w-full pt-24 pb-16 bg-[var(--paper)]">
       <div className="w-full max-w-6xl mx-auto px-4 md:px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -144,7 +144,7 @@ export default function AdminTonioPage() {
             <div className="w-10 h-10 rounded-xl bg-neutral-900 flex items-center justify-center">
               <LayoutDashboard className="w-5 h-5 text-white" />
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-neutral-900 cherry-bomb-one-regular">
+            <h1 className="text-3xl md:text-4xl font-bold text-neutral-900">
               Painel Admin
             </h1>
           </div>

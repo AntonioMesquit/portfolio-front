@@ -1,14 +1,29 @@
-import { Project } from "./project-card";
+import type { Project } from "./types";
 
+/**
+ * Posições são o CENTRO do nó, em porcentagem da área de desenho (0-100).
+ *
+ * Cada projeto tem uma silhueta própria de propósito — espinha vertical, leque,
+ * pipeline horizontal, gravata-borboleta — para que os três nós compartilhados
+ * (client, api, db) percorram uma distância visível a cada troca. Sem isso o Flip
+ * anima, mas ninguém percebe.
+ *
+ * Cores são tons -600: um traço de 1px em tom -500 desaparece sobre papel claro.
+ * `colorText` é a variante -800, porque o -600 reprova contraste AA como texto.
+ *
+ * INVARIANTE de posição, para qualquer par de nós do mesmo projeto:
+ *   Δx >= 34  ou  Δy >= 17
+ * e, se o par tiver aresta, Δx >= 43 ou Δy >= 22 — abaixo disso não sobra vão
+ * para o traço (2*GAP + MIN_SPAN = 16px) e a linha não é desenhada.
+ */
 export const projectsData: Project[] = [
   {
     id: "piesse",
     name: "Piesse",
+    tagline: "Gestão jurídica com assistente inteligente",
     description:
-      "Plataforma completa de gestão jurídica com assistente inteligente e automação de processos.",
-    longDescription:
-      "Piesse é uma plataforma jurídica completa que revoluciona a gestão de processos legais. A plataforma oferece desde a criação automatizada de contratos até jurisprudência inteligente e chatbots especializados. O sistema foi desenvolvido para escalar e atender desde pequenas empresas até grandes corporações, oferecendo uma experiência completa de assistente jurídico.",
-    preview: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1400&h=800&fit=crop",
+      "Plataforma que cobre o processo jurídico de ponta a ponta: geração de contratos, consulta de jurisprudência e chatbots especializados por processo. Começou como SaaS e cresceu até virar um assistente jurídico completo, dimensionado para atender do escritório pequeno à corporação.",
+    year: "2025",
     technologies: [
       "Next.js",
       "TypeScript",
@@ -21,59 +36,33 @@ export const projectsData: Project[] = [
       "Docker",
       "AWS",
     ],
-    workflow: {
+    color: "#4f46e5",
+    colorText: "#4338ca",
+    blueprint: {
+      // Espinha vertical à esquerda, com a inteligência ramificando à direita.
       nodes: [
-        {
-          id: "1",
-          type: "custom",
-          position: { x: 100, y: 100 },
-          data: { label: "Frontend", tech: "Next.js + React" },
-        },
-        {
-          id: "2",
-          type: "custom",
-          position: { x: 400, y: 100 },
-          data: { label: "API Gateway", tech: "NestJS" },
-        },
-        {
-          id: "3",
-          type: "custom",
-          position: { x: 700, y: 100 },
-          data: { label: "Database", tech: "PostgreSQL" },
-        },
-        {
-          id: "4",
-          type: "custom",
-          position: { x: 150, y: 300 },
-          data: { label: "AI Service", tech: "OpenAI" },
-        },
-        {
-          id: "5",
-          type: "custom",
-          position: { x: 550, y: 300 },
-          data: { label: "Chatbot", tech: "Custom AI" },
-        },
+        { role: "client", label: "Frontend", tech: "Next.js", x: 26, y: 12 },
+        { role: "api", label: "API Gateway", tech: "NestJS", x: 26, y: 44 },
+        { role: "db", label: "Database", tech: "PostgreSQL", x: 26, y: 80 },
+        { role: "ai", label: "AI Service", tech: "OpenAI", x: 70, y: 26 },
+        { role: "chatbot", label: "Chatbot", tech: "Custom AI", x: 70, y: 64 },
       ],
       edges: [
-        { id: "e1-2", source: "1", target: "2" },
-        { id: "e2-3", source: "2", target: "3" },
-        { id: "e2-4", source: "2", target: "4" },
-        { id: "e4-5", source: "4", target: "5" },
-        { id: "e2-5", source: "2", target: "5" },
+        { from: "client", to: "api" },
+        { from: "api", to: "db" },
+        { from: "api", to: "ai" },
+        { from: "ai", to: "chatbot" },
+        { from: "api", to: "chatbot" },
       ],
     },
-    color: "#6366f1",
-    gradient:
-      "linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1))",
   },
   {
     id: "frevo",
     name: "Frevo",
+    tagline: "Gestão de eventos e festivais",
     description:
-      "Sistema de gestão de eventos e festivais com integração de pagamentos e controle de acesso.",
-    longDescription:
-      "Frevo é uma plataforma completa para gestão de eventos e festivais culturais. O sistema permite desde a criação e venda de ingressos até o controle de acesso em tempo real. Com integração de pagamentos, gestão de lote e relatórios detalhados, Frevo facilita a organização de eventos de qualquer porte.",
-    preview: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1400&h=800&fit=crop",
+      "Da criação e venda de ingressos ao controle de acesso em tempo real. Integra pagamento, gestão de lotes e relatórios detalhados, para eventos de qualquer porte.",
+    year: "2024",
     technologies: [
       "React",
       "TypeScript",
@@ -86,66 +75,35 @@ export const projectsData: Project[] = [
       "Redis",
       "Vercel",
     ],
-    workflow: {
+    color: "#db2777",
+    colorText: "#9d174d",
+    blueprint: {
+      // Leque: um hub central com os serviços abertos na linha de baixo.
       nodes: [
-        {
-          id: "1",
-          type: "custom",
-          position: { x: 100, y: 100 },
-          data: { label: "Web App", tech: "React + TypeScript" },
-        },
-        {
-          id: "2",
-          type: "custom",
-          position: { x: 400, y: 100 },
-          data: { label: "Backend API", tech: "Node.js + Express" },
-        },
-        {
-          id: "3",
-          type: "custom",
-          position: { x: 700, y: 100 },
-          data: { label: "Database", tech: "MongoDB" },
-        },
-        {
-          id: "4",
-          type: "custom",
-          position: { x: 250, y: 300 },
-          data: { label: "Payment", tech: "Stripe" },
-        },
-        {
-          id: "5",
-          type: "custom",
-          position: { x: 550, y: 300 },
-          data: { label: "Real-time", tech: "Socket.io" },
-        },
-        {
-          id: "6",
-          type: "custom",
-          position: { x: 400, y: 500 },
-          data: { label: "Cache", tech: "Redis" },
-        },
+        { role: "client", label: "Web App", tech: "React", x: 50, y: 8 },
+        { role: "api", label: "Backend API", tech: "Express", x: 50, y: 42 },
+        { role: "db", label: "Database", tech: "MongoDB", x: 94, y: 42 },
+        { role: "payment", label: "Payment", tech: "Stripe", x: 6, y: 80 },
+        { role: "realtime", label: "Real-time", tech: "Socket.io", x: 50, y: 80 },
+        { role: "cache", label: "Cache", tech: "Redis", x: 94, y: 80 },
       ],
       edges: [
-        { id: "e1-2", source: "1", target: "2" },
-        { id: "e2-3", source: "2", target: "3" },
-        { id: "e2-4", source: "2", target: "4" },
-        { id: "e2-5", source: "2", target: "5" },
-        { id: "e2-6", source: "2", target: "6" },
-        { id: "e3-6", source: "3", target: "6" },
+        { from: "client", to: "api" },
+        { from: "api", to: "db" },
+        { from: "api", to: "payment" },
+        { from: "api", to: "realtime" },
+        { from: "api", to: "cache" },
+        { from: "db", to: "cache" },
       ],
     },
-    color: "#ec4899",
-    gradient:
-      "linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(219, 39, 119, 0.1))",
   },
   {
     id: "egle",
     name: "Egle",
+    tagline: "E-learning com gamificação",
     description:
-      "Plataforma de e-learning com gamificação, certificados e sistema de avaliação avançado.",
-    longDescription:
-      "Egle é uma plataforma moderna de educação online que combina aprendizado interativo com gamificação. O sistema oferece cursos estruturados, avaliações automatizadas, certificados digitais e um sistema de conquistas que motiva os alunos. Com dashboard analítico completo, os instrutores podem acompanhar o progresso dos alunos em tempo real.",
-    preview: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1400&h=800&fit=crop",
+      "Cursos estruturados, avaliação automatizada, certificados digitais e um sistema de conquistas. O dashboard analítico deixa o instrutor acompanhar o progresso de cada aluno em tempo real.",
+    year: "2024",
     technologies: [
       "Vue.js",
       "TypeScript",
@@ -158,66 +116,35 @@ export const projectsData: Project[] = [
       "Chart.js",
       "Tailwind CSS",
     ],
-    workflow: {
+    color: "#059669",
+    colorText: "#065f46",
+    blueprint: {
+      // Pipeline da esquerda para a direita, com mídia acima e conteúdo abaixo.
       nodes: [
-        {
-          id: "1",
-          type: "custom",
-          position: { x: 100, y: 100 },
-          data: { label: "Frontend", tech: "Vue.js" },
-        },
-        {
-          id: "2",
-          type: "custom",
-          position: { x: 400, y: 100 },
-          data: { label: "API", tech: "FastAPI" },
-        },
-        {
-          id: "3",
-          type: "custom",
-          position: { x: 700, y: 100 },
-          data: { label: "Database", tech: "PostgreSQL" },
-        },
-        {
-          id: "4",
-          type: "custom",
-          position: { x: 250, y: 300 },
-          data: { label: "CMS", tech: "Django" },
-        },
-        {
-          id: "5",
-          type: "custom",
-          position: { x: 550, y: 300 },
-          data: { label: "Storage", tech: "AWS S3" },
-        },
-        {
-          id: "6",
-          type: "custom",
-          position: { x: 400, y: 500 },
-          data: { label: "Video", tech: "WebRTC" },
-        },
+        { role: "video", label: "Video", tech: "WebRTC", x: 6, y: 14 },
+        { role: "client", label: "Frontend", tech: "Vue.js", x: 6, y: 52 },
+        { role: "api", label: "API", tech: "FastAPI", x: 50, y: 66 },
+        { role: "db", label: "Database", tech: "PostgreSQL", x: 94, y: 20 },
+        { role: "storage", label: "Storage", tech: "AWS S3", x: 94, y: 92 },
+        { role: "cms", label: "CMS", tech: "Django", x: 50, y: 96 },
       ],
       edges: [
-        { id: "e1-2", source: "1", target: "2" },
-        { id: "e2-3", source: "2", target: "3" },
-        { id: "e2-4", source: "2", target: "4" },
-        { id: "e2-5", source: "2", target: "5" },
-        { id: "e2-6", source: "2", target: "6" },
-        { id: "e4-5", source: "4", target: "5" },
+        { from: "client", to: "api" },
+        { from: "api", to: "db" },
+        { from: "api", to: "video" },
+        { from: "api", to: "cms" },
+        { from: "api", to: "storage" },
+        { from: "cms", to: "storage" },
       ],
     },
-    color: "#10b981",
-    gradient:
-      "linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1))",
   },
   {
     id: "1001tem",
     name: "1001Tem",
+    tagline: "Marketplace de serviços com matching",
     description:
-      "Marketplace de serviços com sistema de matching inteligente e avaliações em tempo real.",
-    longDescription:
-      "1001Tem é um marketplace inovador que conecta prestadores de serviços com clientes de forma inteligente. O sistema utiliza algoritmos de matching para sugerir os melhores profissionais baseado em localização, avaliações e histórico. Com sistema de pagamento integrado, chat em tempo real e sistema de avaliações, 1001Tem facilita a contratação de serviços de qualquer tipo.",
-    preview: "https://images.unsplash.com/photo-1556740758-90de374c12ad?w=1400&h=800&fit=crop",
+      "Conecta prestadores e clientes por um algoritmo que pondera localização, avaliação e histórico. Pagamento integrado, chat em tempo real e reputação pública, na web e no mobile.",
+    year: "2025",
     technologies: [
       "Next.js",
       "TypeScript",
@@ -230,62 +157,27 @@ export const projectsData: Project[] = [
       "Maps API",
       "Stripe",
     ],
-    workflow: {
+    color: "#d97706",
+    colorText: "#92400e",
+    blueprint: {
+      // Gravata-borboleta: dois clientes convergem no GraphQL e ele abre em quatro serviços.
       nodes: [
-        {
-          id: "1",
-          type: "custom",
-          position: { x: 100, y: 100 },
-          data: { label: "Web App", tech: "Next.js" },
-        },
-        {
-          id: "2",
-          type: "custom",
-          position: { x: 100, y: 300 },
-          data: { label: "Mobile", tech: "React Native" },
-        },
-        {
-          id: "3",
-          type: "custom",
-          position: { x: 400, y: 200 },
-          data: { label: "GraphQL API", tech: "Apollo Server" },
-        },
-        {
-          id: "4",
-          type: "custom",
-          position: { x: 700, y: 200 },
-          data: { label: "Database", tech: "PostgreSQL" },
-        },
-        {
-          id: "5",
-          type: "custom",
-          position: { x: 400, y: 400 },
-          data: { label: "Auth", tech: "Firebase" },
-        },
-        {
-          id: "6",
-          type: "custom",
-          position: { x: 700, y: 400 },
-          data: { label: "Payment", tech: "Stripe" },
-        },
-        {
-          id: "7",
-          type: "custom",
-          position: { x: 550, y: 100 },
-          data: { label: "Maps", tech: "Google Maps" },
-        },
+        { role: "client", label: "Web App", tech: "Next.js", x: 6, y: 18 },
+        { role: "mobile", label: "Mobile", tech: "React Native", x: 6, y: 72 },
+        { role: "api", label: "GraphQL API", tech: "Apollo", x: 50, y: 45 },
+        { role: "db", label: "Database", tech: "PostgreSQL", x: 94, y: 6 },
+        { role: "auth", label: "Auth", tech: "Firebase", x: 94, y: 32 },
+        { role: "payment", label: "Payment", tech: "Stripe", x: 94, y: 58 },
+        { role: "maps", label: "Maps", tech: "Google Maps", x: 94, y: 94 },
       ],
       edges: [
-        { id: "e1-3", source: "1", target: "3" },
-        { id: "e2-3", source: "2", target: "3" },
-        { id: "e3-4", source: "3", target: "4" },
-        { id: "e3-5", source: "3", target: "5" },
-        { id: "e3-6", source: "3", target: "6" },
-        { id: "e3-7", source: "3", target: "7" },
+        { from: "client", to: "api" },
+        { from: "mobile", to: "api" },
+        { from: "api", to: "db" },
+        { from: "api", to: "auth" },
+        { from: "api", to: "payment" },
+        { from: "api", to: "maps" },
       ],
     },
-    color: "#f59e0b",
-    gradient:
-      "linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.1))",
   },
 ];

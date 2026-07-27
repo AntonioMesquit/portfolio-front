@@ -3,150 +3,134 @@
 import { useMemo } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { ArrowLeft, Loader2, User } from "lucide-react";
-import { formatDate } from "../../lib/format";
 import {
   MarkdownContent,
   ShareButtons,
   PostLinks,
   TableOfContents,
   extractHeadings,
+  stripLeadingTitle,
+  PostCover,
+  hasCover,
+  ReadingRule,
+  ArticleNav,
 } from "../../components/blog";
 import { usePost } from "../../hooks";
-import { ReadingProgress } from "../../components/ui/reading-progress";
+import { localNeighbors } from "../../lib/posts";
+import { CONTACT } from "../../components/edition/edition-data";
+
+/** "26 de julho de 2026" — por extenso, como a carta assina. */
+function longDate(iso: string | null): string {
+  if (!iso) return "sem data";
+  return new Intl.DateTimeFormat("pt-BR", {
+    dateStyle: "long",
+    timeZone: "America/Fortaleza",
+  }).format(new Date(iso));
+}
 
 export default function BlogPostPage() {
   const params = useParams();
   const slug = typeof params.slug === "string" ? params.slug : "";
 
   const { data: post, isLoading, isError } = usePost(slug);
-  const headings = useMemo(
-    () => extractHeadings(post?.content ?? ""),
-    [post?.content]
+
+  // O corpo sem o título repetido, e o sumário extraído DESSE corpo — se as
+  // duas fontes divergirem, o mapeamento posicional de ids sai deslocado.
+  const body = useMemo(
+    () => stripLeadingTitle(post?.content ?? "", post?.title ?? ""),
+    [post?.content, post?.title]
   );
+  const headings = useMemo(() => extractHeadings(body), [body]);
+  const vizinhos = useMemo(() => localNeighbors(slug), [slug]);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen w-full pt-24 pb-16 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-neutral-400" />
+      <div className="cd-page">
+        <div className="cd-inner">
+          <p className="cd-empty">Carregando…</p>
+        </div>
       </div>
     );
   }
 
   if (isError || !post) {
     return (
-      <div className="min-h-screen w-full pt-24 pb-16">
-        <div className="max-w-3xl mx-auto px-4 text-center">
-          <h1 className="text-2xl font-bold text-neutral-900 mb-2">
-            Artigo não encontrado
-          </h1>
-          <Link
-            href="/blog"
-            className="text-neutral-600 hover:text-neutral-900 underline"
-          >
-            ← Voltar para o blog
+      <div className="cd-page">
+        <div className="cd-inner">
+          <p className="cd-article__meta">Erro 404</p>
+          <h1 className="cd-article__title">Este artigo não existe.</h1>
+          <div className="cd-article__rule" />
+          <Link className="ed-link cd-back" href="/blog">
+            ← Voltar ao caderno
           </Link>
         </div>
       </div>
     );
   }
 
-  const firstCategory = post.categories?.[0];
+  const category = post.categories?.[0];
 
   return (
-    <div className="min-h-screen w-full pt-24 pb-16 bg-white dark:bg-neutral-950">
-      <ReadingProgress />
-      <div className="w-full max-w-6xl mx-auto px-4 md:px-6 flex flex-col xl:flex-row xl:gap-12">
-        <div className="flex-1 min-w-0 max-w-4xl">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="mb-8"
-          >
-            <Link
-              href="/blog"
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors text-sm font-medium"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Voltar para o blog</span>
-            </Link>
-          </motion.div>
+    <div className="cd-page">
+      {/* O fio do cabeçalho entintando conforme o corpo do artigo passa. */}
+      <ReadingRule targetId="corpo-do-artigo" />
 
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
-            className="flex flex-wrap items-center gap-2.5 mb-5"
-          >
-            {firstCategory && (
-              <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-700/50 text-amber-900 dark:text-amber-200 text-sm font-semibold">
-                {firstCategory.name}
-              </span>
-            )}
-            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-700/50 text-amber-900 dark:text-amber-200 text-sm font-medium">
-              {formatDate(post.published_at)}
-            </span>
-            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-700/50 text-amber-900 dark:text-amber-200 text-sm font-medium">
-              {post.read_time_minutes} min de leitura
-            </span>
-          </motion.div>
+      {/* --artigo vira grade de duas colunas em ≥1280px: texto + sumário fixo */}
+      <div className="cd-inner cd-inner--artigo">
+        <article className="cd-article" data-tx>
+          <Link className="ed-link cd-back" href="/blog">
+            ← Caderno
+          </Link>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-3xl md:text-4xl lg:text-5xl font-bold text-neutral-900 dark:text-white cherry-bomb-one-regular mb-6 leading-tight"
-          >
-            {post.title}
-          </motion.h1>
+          <p className="cd-article__meta">
+            {[
+              category?.name,
+              longDate(post.published_at),
+              `${post.read_time_minutes} min de leitura`,
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+          </p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="flex items-center gap-4 p-4 rounded-2xl bg-neutral-50 dark:bg-neutral-900/50 border border-neutral-200/80 dark:border-neutral-700/50 mb-10"
-          >
-            <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/40 border border-amber-200/80 dark:border-amber-700/50 flex items-center justify-center shrink-0">
-              <User className="w-6 h-6 text-amber-700 dark:text-amber-400" />
-            </div>
-            <div>
-              <p className="font-bold text-neutral-900 dark:text-white">Antonio Mesquita</p>
-              <p className="text-sm text-neutral-600 dark:text-neutral-400">Desenvolvedor Full Stack</p>
-            </div>
-          </motion.div>
+          <h1 className="cd-article__title">{post.title}</h1>
+          <div className="cd-article__rule" />
 
-          <motion.article
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="[&_*:first-child]:mt-0"
-          >
-            <MarkdownContent content={post.content} headings={headings} />
-          </motion.article>
+          {hasCover(post.cover) && <PostCover cover={post.cover} priority />}
 
-          {post.links && post.links.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25 }}
-            >
-              <PostLinks links={post.links} />
-            </motion.div>
-          )}
+          <div id="corpo-do-artigo">
+            <MarkdownContent
+              className="cd-prose"
+              content={body}
+              headings={headings}
+            />
+          </div>
 
-          <motion.section
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="mt-12 pt-8 border-t border-neutral-200 dark:border-neutral-700"
-          >
-            <h3 className="text-xs font-bold text-neutral-600 dark:text-neutral-400 uppercase tracking-widest mb-4">
-              Compartilhar este artigo
-            </h3>
+          {post.links && post.links.length > 0 && <PostLinks links={post.links} />}
+
+          {/*
+            Assinatura, não "sobre o autor".
+            A carta em /sobre fecha assinada; um artigo do mesmo caderno fecha
+            do mesmo jeito. Cartão de autor com foto e biografia seria um
+            componente de template, e o site não tem nenhum.
+          */}
+          <div className="cd-assina">
+            <p className="cd-assina__nome">Antonio Mesquita</p>
+            <p className="cd-assina__linha">
+              Escrevo aqui de vez em quando. Discordância por e-mail é bem-vinda:{" "}
+              <a className="ed-link" href={`mailto:${CONTACT.email}`}>
+                {CONTACT.email}
+              </a>
+              .
+            </p>
+          </div>
+
+          <ArticleNav anterior={vizinhos.anterior} proximo={vizinhos.proximo} />
+
+          <div className="cd-foot">
+            <p className="cd-foot__label">Compartilhar</p>
             <ShareButtons title={post.title} slug={post.slug} />
-          </motion.section>
-        </div>
+          </div>
+        </article>
 
         <TableOfContents headings={headings} />
       </div>

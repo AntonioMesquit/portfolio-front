@@ -1,45 +1,40 @@
-"use client";
+import Link from "next/link";
+import { Mark } from "./mark";
+import { NavTabs } from "./nav-tabs";
 
-import { useState, useEffect } from "react";
-import NavbarDesktop from "./navbar-desktop";
-import NavbarMobile from "./navbar-mobile";
-
+/**
+ * A BARRA DE REGISTRO.
+ *
+ * Em gráfica, "casar o registro" é acertar o alinhamento entre chapas. O header
+ * é a chapa que nunca sai: ele carrega, permanentemente, duas marcas de corte —
+ * a mesma geometria de `.bp-mark`, que a prancha usa nos cantos da folha.
+ *
+ * O fio de baixo é um ELEMENTO, não um `border-b`. Não é preciosismo: borda não
+ * pode ser transladada sozinha, elemento pode — e é ele que entra fora de
+ * registro junto com a página, como a terceira chapa.
+ *
+ * Server component. Só a faixa de abas precisa de cliente.
+ */
 export default function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  useEffect(() => {
-    if (isMenuOpen) {
-      document.body.style.overflow = "hidden";
-      document.body.style.overflowX = "hidden";
-      document.body.style.overflowY = "hidden";
-    } else {
-      document.body.style.overflow = "";
-      document.body.style.overflowX = "";
-      document.body.style.overflowY = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-      document.body.style.overflowX = "";
-      document.body.style.overflowY = "";
-    };
-  }, [isMenuOpen]);
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-
-  const closeMenu = () => {
-    setIsMenuOpen(false);
-  };
-
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200/50">
-      <NavbarDesktop />
-      <NavbarMobile 
-        isMenuOpen={isMenuOpen}
-        toggleMenu={toggleMenu}
-        closeMenu={closeMenu}
-      />
-    </div>
+    <header className="rg-bar">
+      <span className="rg-crop rg-crop--l" aria-hidden="true" />
+      <span className="rg-crop rg-crop--r" aria-hidden="true" />
+
+      <div className="rg-bar__inner">
+        <Link
+          className="rg-lockup"
+          href="/"
+          aria-label="Antonio Mesquita — ir para a página inicial"
+        >
+          <Mark />
+          <span>Antonio Mesquita</span>
+        </Link>
+
+        <NavTabs />
+      </div>
+
+      <div className="rg-bar__rule" data-plate="fio" aria-hidden="true" />
+    </header>
   );
 }

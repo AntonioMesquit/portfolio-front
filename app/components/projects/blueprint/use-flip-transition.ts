@@ -11,6 +11,9 @@ gsap.registerPlugin(Flip, useGSAP);
 const FLIP_DURATION = 0.95;
 const FLIP_EASE = "power3.inOut";
 
+/** ~3s a 60fps. Teto do laço que espera a transição de rota terminar. */
+const SETTLE_FRAME_CAP = 180;
+
 function prefersReducedMotion(): boolean {
   if (typeof window === "undefined" || !window.matchMedia) return false;
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -61,6 +64,67 @@ export function useFlipTransition(index: number) {
     });
   }, []);
 
+  /**
+   * Adia a primeira medição até o ancestral parar de deformar.
+   *
+   * `getBoundingClientRect` enxerga transform — e é exatamente isso que se quer
+   * durante o voo do Flip: as linhas acompanham os nós porque leem a posição já
+   * transformada. No primeiro render, porém, quem está transformando não é o
+   * Flip: é a transição de rota, que abre a página inteira a partir de
+   * `scaleY: 0.006` em cada bloco `[data-tx]` — e `.bp-stage` é ancestral desta
+   * prancha.
+   *
+   * Medir naquele instante devolve os nós empilhados a 0,6% da altura. Aí
+   * `orthogonalPath` descarta como sobrepostos os pares que só se distinguem na
+   * vertical (`MIN_SPAN`), e as conexões nascem sem `d` ou apontando para o topo
+   * da folha.
+   *
+   * E não se consertavam sozinhas: o ResizeObserver abaixo observa a caixa de
+   * LAYOUT, que transform nenhum altera. Sem isto, o diagrama só se acertava
+   * quando o usuário trocava de projeto — que é o que disparava um novo sync.
+   *
+   * São dois testes, e nenhum basta sozinho:
+   *
+   * 1. Altura visual contra altura de LAYOUT, com folga de 1px. Pega a
+   *    deformação grosseira. Não pode ser exato: `offsetHeight` é inteiro e
+   *    `getBoundingClientRect` é fracionário, então sem transform nenhum eles
+   *    já diferem até meio pixel.
+   * 2. Altura visual parada por dois quadros. A folga do teste 1 libera a
+   *    medição ainda na cauda do easing, e os nós assentam meio pixel depois —
+   *    invisível, mas é diferença real entre entrar na rota e trocar de projeto.
+   *
+   * O teto de quadros existe para isto nunca virar laço eterno se alguma
+   * transição não terminar.
+   */
+  const settleFrame = useRef(0);
+
+  const syncWhenSettled = useCallback(() => {
+    cancelAnimationFrame(settleFrame.current);
+    let frames = 0;
+    let lastHeight = -1;
+    let stable = 0;
+
+    const tick = () => {
+      const root = containerRef.current;
+      if (!root) return;
+
+      const visual = root.getBoundingClientRect().height;
+      const deformed = Math.abs(visual - root.offsetHeight) >= 1;
+      stable = visual === lastHeight ? stable + 1 : 0;
+      lastHeight = visual;
+
+      if ((!deformed && stable >= 2) || frames++ > SETTLE_FRAME_CAP) {
+        syncEdges();
+        return;
+      }
+      settleFrame.current = requestAnimationFrame(tick);
+    };
+
+    settleFrame.current = requestAnimationFrame(tick);
+  }, [syncEdges]);
+
+  useEffect(() => () => cancelAnimationFrame(settleFrame.current), []);
+
   /** Lê o estado atual do DOM. Precisa rodar antes do re-render do React. */
   const capture = useCallback(() => {
     const root = containerRef.current;
@@ -88,9 +152,11 @@ export function useFlipTransition(index: number) {
       const state = stateRef.current;
       stateRef.current = null;
 
-      // Primeiro render: nada a animar, só registrar a linha de base.
+      // Primeiro render: nada a animar, só registrar a linha de base — e
+      // remedir quando a transição de rota devolver a folha ao tamanho real.
       if (!state) {
         previousEdgeKeys.current = currentEdgeKeys;
+        syncWhenSettled();
         return;
       }
 

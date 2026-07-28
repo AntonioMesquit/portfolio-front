@@ -5,6 +5,7 @@ import Navbar from "./components/navbar/components/navbar";
 import { Providers } from "./providers";
 import { AppLoader } from "./components/app-loader";
 import { RegisterTransition } from "./components/navbar/components/register-transition";
+import { SITE_NAME, SITE_URL } from "./lib/site";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -17,9 +18,21 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+/*
+  `metadataBase` mora aqui porque metadata do Next herda do layout pai: definido
+  uma vez na raiz, vale inclusive para as rotas que não exportam metadata
+  nenhuma — o 404, por exemplo. Sem ele, toda URL relativa (canonical, imagem de
+  OG) é resolvida contra localhost.
+*/
 export const metadata: Metadata = {
+  metadataBase: SITE_URL,
   title: "Antonio Mesquita",
   description: "Portfolio de Antonio Mesquita - Desenvolvedor Full Stack",
+  openGraph: {
+    siteName: SITE_NAME,
+    locale: "pt_BR",
+    type: "website",
+  },
 };
 
 export default function RootLayout({

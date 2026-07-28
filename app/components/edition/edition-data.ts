@@ -37,10 +37,16 @@ export const trajectory: TrajectoryRow[] = [
     what: "SaaS para web e mobile: Next.js, TypeScript, React Native, Vue.js, NestJS e Cloudflare.",
   },
   {
-    period: "Desde 2025",
+    period: "2025 – 2026",
     where: "Startup jurídica",
     role: "CTO",
-    what: "Contratos, jurisprudência e um chatbot por processo. Começou como SaaS e virou plataforma.",
+    what: "Contratos, jurisprudência e um chatbot por processo. Começou como SaaS e virou plataforma. A empresa foi vendida.",
+  },
+  {
+    period: "Desde 2026",
+    where: "Realize Software",
+    role: "Desenvolvedor pleno",
+    what: "Sistema de armazém: coletor mobile com sincronização offline, painel web e API. Expo, React Router e ElysiaJS.",
     current: true,
   },
 ];

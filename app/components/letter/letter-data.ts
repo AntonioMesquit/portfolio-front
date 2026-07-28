@@ -42,7 +42,7 @@ export interface Movement {
 export const OPENING = {
   vocative: "Para quem veio da tabela,",
   paragraph:
-    "Se você chegou pela home, já viu a tabela: quatro linhas, quatro períodos e uma coluna chamada “o que fiz”. Está tudo certo lá, e é curto de propósito. O que vem agora é a outra metade — o que eu não sabia, o que mudou e o que eu ainda faço mal. Nenhuma linha se repete aqui; se repetisse, uma das duas páginas estaria sobrando.",
+    "Se você chegou pela home, já viu a tabela: cinco linhas, cinco períodos e uma coluna chamada “o que fiz”. Está tudo certo lá, e é curto de propósito. O que vem agora é a outra metade — o que eu não sabia, o que mudou e o que eu ainda faço mal. Nenhuma linha se repete aqui; se repetisse, uma das duas páginas estaria sobrando.",
 } as const;
 
 export const MOVEMENTS: Movement[] = [
@@ -85,8 +85,8 @@ export const MOVEMENTS: Movement[] = [
     stub: "A decisão",
     gloss: "e o preço de dizer não",
     paragraphs: [
-      "O que eu faço hoje soa maior do que é. Não tem departamento, não tem organograma, não tem ninguém entre mim e o problema. Na prática significa uma coisa só: quando uma decisão técnica está errada, a culpa tem endereço, e o endereço é o meu.",
-      "A parte difícil não foi técnica. Foi descobrir que o que mais travou o que eu toco não era decisão de engenharia — era decisão de produto que ninguém quis tomar. Pergunta do tipo “o que o sistema faz quando o caso não se encaixa em nenhuma regra” não se resolve escolhendo banco de dados. Ela fica parada até alguém assumir, e quem assume normalmente é quem estava do lado.",
+      "O cargo que eu tive soa maior do que era. Não tinha departamento, não tinha organograma, não tinha ninguém entre mim e o problema. Na prática significava uma coisa só: quando uma decisão técnica estava errada, a culpa tinha endereço, e o endereço era o meu.",
+      "A parte difícil não foi técnica. Foi descobrir que o que mais travava o que eu tocava não era decisão de engenharia — era decisão de produto que ninguém quis tomar. Pergunta do tipo “o que o sistema faz quando o caso não se encaixa em nenhuma regra” não se resolve escolhendo banco de dados. Ela fica parada até alguém assumir, e quem assume normalmente é quem estava do lado.",
       "E tem a parte de dizer não. Eu sempre fui muito melhor em dizer “dá para fazer” do que em dizer “dá, custa isto, e por isso eu acho que não deveríamos”. A primeira frase é fácil e agrada na hora. A segunda exige número, exige estar disposto a errar na frente de todo mundo, e exige aguentar o silêncio de dois segundos depois. Ainda estou aprendendo a segunda. É o que mais mudou o meu trabalho no último ano, e não tem uma linha de código dentro.",
     ],
   },

@@ -16,12 +16,12 @@ export function Lede() {
     <div className="ed-lede">
       <div className="ed-lede__text">
         <h1 className="ed-headline" data-print>
-          Em 2022 eu era calouro. Em 2025, CTO.
+          Em 2022 eu era calouro. Em 2026, desenvolvedor pleno.
         </h1>
         <p className="ed-standfirst" data-print>
           Desenvolvedor no Ceará. Entrei na faculdade sem rumo nenhum e aprendi o
-          ofício trabalhando. Hoje cuido da parte técnica de uma startup jurídica
-          e continuo pegando freela e parceria.
+          ofício trabalhando. Hoje escrevo software de logística na Realize
+          Software e continuo pegando freela e parceria.
         </p>
       </div>
 

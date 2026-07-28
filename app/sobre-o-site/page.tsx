@@ -128,8 +128,8 @@ export default function SobreOSitePage() {
               <div className="p-6 rounded-2xl bg-neutral-50 border border-neutral-100">
                 <h3 className="font-semibold text-neutral-900 mb-2">Sobre</h3>
                 <p className="text-neutral-600 text-sm leading-relaxed mb-3">
-                  Trajetória de aluno de Ciência da Computação (2022, 17 anos) a CTO de startup
-                  jurídica — plataforma completa de assistente jurídico.
+                  Trajetória de aluno de Ciência da Computação (2022, 17 anos) a desenvolvedor
+                  pleno na Realize Software, passando por CTO de startup jurídica.
                 </p>
                 <p className="text-xs text-neutral-500">→ /sobre</p>
               </div>

@@ -43,3 +43,8 @@ next-env.d.ts
 
 # prints de verificação (scripts/shoot*.js)
 /shots*
+
+# NÃO acrescente `.env*` aqui embaixo: a CLI da Vercel faz isso sozinha a cada
+# `link` ou `env pull`, e a linha no fim do arquivo vence o `!.env.example` lá
+# de cima — some com o único .env versionado, que é justamente o que documenta
+# as variáveis. As duas regras já estão na seção "env files".
